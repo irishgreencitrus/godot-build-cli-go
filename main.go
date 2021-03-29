@@ -4,8 +4,12 @@ import (
 	"archive/zip"
 	"bufio"
 	"bytes"
+	"flag"
 	"fmt"
 	"io"
+	"io/fs"
+	"io/ioutil"
+	"errors"
 	"net/http"
 	"os"
 	"os/exec"
@@ -14,7 +18,7 @@ import (
 	"strings"
 	"sync"
 )
-
+const ALL_SELECTOR string = "all"
 var versions = []string{
 	"3.2.3-stable",
 	"3.2.2-stable",
@@ -23,18 +27,56 @@ var versions = []string{
 	"3.1.2-stable",
 	"3.1.1-stable",
 	"3.1-stable",
-	"2.1.6-stable",
 }
-
+var platforms = []string{
+	"linux/amd64",
+	"linux/arm",
+	"linux/arm64",
+}
 func main() {
 	args := os.Args[1:]
-	printLogo()
-	if len(args) == 0 {
-		fmt.Println("No arguments specified. Continuing in interactive mode.")
-		interactiveMode()
-	} else if stringInSlice("--download-only", args) {
-		fmt.Println("Download Only Specified. Only downloading source and not building them.")
+	//runtimeName := os.Args[0]
+
+	downloadFlag := flag.String("download","","Downloads specified version")
+	moveFlag := flag.String("move","","Moves specified builds to an easier to access location")
+	buildFlag := flag.String("build","","Builds specified version")
+	shouldPrintVersion := flag.Bool("V",false,"Prints available versions")
+	shouldPrintPlatform := flag.Bool("P",false,"Prints available platforms")
+	shouldRemoveZips := flag.Bool("Z",false,"Removes version zip files")
+	
+	flag.Parse()
+	if *shouldPrintVersion {
+		fmt.Println("Available Versions:")
+		fmt.Println(strings.Join(versions,"\n"))
 	}
+	if *shouldPrintPlatform {
+		fmt.Println("Available Platforms")
+		fmt.Println(strings.Join(platforms,"\n"))
+	}
+	if *downloadFlag != "" {
+		fmt.Println("Download Version Specified ",*downloadFlag)
+		downloadInitialiser(*downloadFlag)
+	}
+	if *buildFlag != ""{
+		fmt.Println("Build Version Specified ", *buildFlag)
+		buildInitialiser(*buildFlag)
+	}
+	if *shouldRemoveZips {
+		cleanZips()
+	}
+	if *moveFlag != ""{
+		moveInitialiser(*moveFlag)
+	}
+	if len(args) == 0 {
+		printLogo()
+		interactiveMode()
+	}
+
+
+	// if len(args) == 0 {
+	
+	// 	fmt.Println("No arguments specified. Continuing in interactive mode.")
+	
 
 }
 
@@ -101,65 +143,29 @@ func interactiveMode() {
 				continue
 			}
 			chosenversion := command[1]
-			if chosenversion == "*" {
-				fmt.Println("Downloading every version.")
-				var wg sync.WaitGroup
-				for ver := range versions {
-					wg.Add(1)
-					go func(v int) {
-						downloadVersion(versions[v])
-						wg.Done()
-					}(ver)
-
-				}
-				wg.Wait()
-				fmt.Println("All versions downloaded and extracted to /downloads directory")
-			} else if !stringInSlice(chosenversion, versions) {
-				fmt.Println("Godot version not found or supported. To check versions type versions.")
-				continue
-			} else {
-				downloadVersion(chosenversion)
-				//fmt.Println("Unzipped:\n" + strings.Join(files, "\n"))
-			}
+			downloadInitialiser(chosenversion)
+			
 		case "build":
 			if len(command) != 2 {
 				fmt.Println("Usage: build <version>")
 				continue
 			}
 			buildver := command[1]
-			if !stringInSlice(buildver, versions) && buildver != "*" {
-				fmt.Println("Godot version not found or supported. To check versions type versions.")
-				continue
-			} else {
-
-				godotdir := fmt.Sprintf("download/godot-%s", buildver)
-
-				if buildver == "*" {
-					fmt.Println("Building all versions")
-					for i := range versions {
-						if _, err := os.Stat("download/godot-" + versions[i]); os.IsNotExist(err) {
-							fmt.Printf("Build directory not found for %s. Try downloading it using the download command\n", versions[i])
-							continue
-						}
-						fmt.Println(versions[i])
-						buildGodot(versions[i])
-					}
-				} else if _, err := os.Stat(godotdir); os.IsNotExist(err) {
-					fmt.Println("Build directory not found. Try downloading it using the download command")
-				} else {
-					fmt.Println("Building", buildver)
-					buildGodot(buildver)
-				}
-			}
+			buildInitialiser(buildver)
+		case "move_built":
+			moveBuilt(command[1])
+		case "cleanzips":
+			cleanZips()
 		default:
 			fmt.Println("Command list:")
 			fmt.Println("exit")
 			fmt.Println("build")
 			fmt.Println("versions")
+			fmt.Println("move_built")
+			fmt.Println("cleanzips")
 		}
 	}
 }
-
 // This function is stolen from
 // https://golangcode.com/download-a-file-from-a-url/
 // It writes to the file as it downloads it to prevent it from loading the entire file into memory
@@ -183,7 +189,6 @@ func downloadFile(filepath string, url string) error {
 	_, err = io.Copy(out, resp.Body)
 	return err
 }
-
 // This function is stolen from
 // https://golangcode.com/unzip-files-in-go/
 // Unzips the file keeping directory structure
@@ -243,7 +248,52 @@ func Unzip(src string, dest string) ([]string, error) {
 
 	return filenames, nil
 }
+func downloadInitialiser(version string){
+	if version == ALL_SELECTOR {
+		fmt.Println("Downloading every version.")
+		var wg sync.WaitGroup
+		for ver := range versions {
+			wg.Add(1)
+			go func(v int) {
+				downloadVersion(versions[v])
+				wg.Done()
+			}(ver)
 
+		}
+		wg.Wait()
+		fmt.Println("All versions downloaded and extracted to /downloads directory")
+	} else if !stringInSlice(version, versions) {
+		fmt.Println("Godot version not found or supported. To check versions type versions.")
+	} else {
+		downloadVersion(version)
+		//fmt.Println("Unzipped:\n" + strings.Join(files, "\n"))
+	}
+}
+func buildInitialiser(version string){
+	if !stringInSlice(version, versions) && version != ALL_SELECTOR {
+		fmt.Println("Godot version not found or supported. To check versions type versions.")
+	} else {
+
+		godotdir := fmt.Sprintf("download/godot-%s", version)
+
+		if version == ALL_SELECTOR {
+			fmt.Println("Building all versions")
+			for i := range versions {
+				if _, err := os.Stat("download/godot-" + versions[i]); os.IsNotExist(err) {
+					fmt.Printf("Build directory not found for %s. Try downloading it using the download command\n", versions[i])
+					continue
+				}
+				fmt.Println(versions[i])
+				buildGodot(versions[i])
+			}
+		} else if _, err := os.Stat(godotdir); os.IsNotExist(err) {
+			fmt.Println("Build directory not found. Try downloading it using the download command")
+		} else {
+			fmt.Println("Building", version)
+			buildGodot(version)
+		}
+	}
+}
 func downloadVersion(chosenversion string) {
 	url := fmt.Sprintf("https://github.com/godotengine/godot/archive/%s.zip", chosenversion)
 	path := fmt.Sprintf("%s.zip", chosenversion)
@@ -253,21 +303,22 @@ func downloadVersion(chosenversion string) {
 	Unzip(path, "download")
 	fmt.Println("Successfully Unzipped", path)
 }
-
 func buildGodot(ver string) {
 	switch runtime.GOOS {
 	case "windows":
-		buildWithFlags(ver, strings.Fields("-j8 platform=windows tools=no disable_3d=yes"))
+		buildWithFlags(ver, strings.Fields("-j"+fmt.Sprint(runtime.NumCPU())+" platform=windows"))
 	case "linux":
 		if runtime.GOARCH == "amd64" {
-			buildWithFlags(ver, strings.Fields("-j8 platform=x11"))
+			buildWithFlags(ver, strings.Fields("-j"+fmt.Sprint(runtime.NumCPU())+" platform=x11"))
 		} else if runtime.GOARCH == "arm64" {
 			os.Setenv("CCFLAGS", "-mtune=cortex-a72 -mcpu=cortex-a72 -mfloat-abi=hard -mlittle-endian -munaligned-access -mfpu=neon-fp-armv8")
-			buildWithFlags(ver, strings.Fields("platform=server target=release tools=no use_llvm=yes -j4"))
+			buildWithFlags(ver, strings.Fields("platform=server target=release tools=no use_llvm=yes -j"+fmt.Sprint(runtime.NumCPU())))
+		} else if runtime.GOARCH == "arm"{
+			os.Setenv("CCFLAGS", "-mtune=cortex-a72 -mcpu=cortex-a72 -mfloat-abi=hard -mlittle-endian -munaligned-access -mfpu=neon-fp-armv8")
+			buildWithFlags(ver, strings.Fields("platform=server target=release tools=no use_llvm=yes -j"+fmt.Sprint(runtime.NumCPU())))
 		}
 	}
 }
-
 func buildWithFlags(vers string, flags []string) {
 
 	//for x := range flags{
@@ -287,4 +338,48 @@ func buildWithFlags(vers string, flags []string) {
 	}
 	cmd.Wait()
 	fmt.Println(errb.String())
+}
+func moveBuilt(ver string){
+	files,err := ioutil.ReadDir("download/godot-"+ver+"/bin")
+	if errors.Is(err, fs.ErrNotExist){
+		_,er := ioutil.ReadDir("download/godot-"+ver)
+		if errors.Is(er,fs.ErrNotExist){
+			fmt.Println("This version doesn't exist in downloads")
+		} else {
+			fmt.Println("This version hasn't been built yet. Build it using build <version>.")
+		}
+		
+	}
+	for _,f := range files{
+		fmt.Println("Moving: " + f.Name())
+		if _,er := os.Stat("builds"); os.IsNotExist(er){
+			os.Mkdir("builds",0755)
+		}
+		err := os.Rename("download/godot-"+ver+"/bin/"+f.Name(),"builds/"+ver+"."+f.Name())
+		if err != nil {
+			fmt.Println(err)
+		}
+	}
+	
+}
+func moveInitialiser(vers string){
+	if vers == ALL_SELECTOR {
+		fmt.Println("Moving all builds.")
+		for _,i := range versions {
+			moveBuilt(i)
+		}
+	} else {
+		moveBuilt(vers)
+	}
+}
+func cleanZips(){
+	for _,i := range versions {
+		err := os.Remove(i+".zip")
+		if err != nil{
+			fmt.Println(i+".zip not found. Can't be removed.")
+		} else {
+			fmt.Println("Removed "+i+".zip")
+		}
+		
+	}
 }

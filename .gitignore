@@ -16,4 +16,6 @@
 
 # Test data
 download/
+builds/
 *.zip
+main
