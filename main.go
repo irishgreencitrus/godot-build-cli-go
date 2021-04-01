@@ -4,12 +4,13 @@ import (
 	"archive/zip"
 	"bufio"
 	"bytes"
+	"errors"
 	"flag"
 	"fmt"
 	"io"
 	"io/fs"
 	"io/ioutil"
-	"errors"
+	"log"
 	"net/http"
 	"os"
 	"os/exec"
@@ -17,6 +18,7 @@ import (
 	"runtime"
 	"strings"
 	"sync"
+
 )
 const ALL_SELECTOR string = "all"
 var versions = []string{
@@ -28,20 +30,39 @@ var versions = []string{
 	"3.1.1-stable",
 	"3.1-stable",
 }
+var types = []string{
+	"editor",
+	"export",
+	"headless",
+	"server",
+}
+
+var typ = types[0]
+var typFlag = ""
 var platforms = []string{
 	"linux/amd64",
 	"linux/arm",
 	"linux/arm64",
 }
+
+const (
+	EDITOR_FLAGS = "platform=x11 target=release_debug tools=yes"
+	EXPORT_FLAGS = "platform=x11 target=release tools=no"
+	HEADLESS_FLAGS = "platform=server target=release_debug tools=yes"
+	SERVER_FLAGS = "platform=server target=release tools=no"
+)
 func main() {
 	args := os.Args[1:]
+	typeInitialiser(typ)
 	//runtimeName := os.Args[0]
 
 	downloadFlag := flag.String("download","","Downloads specified version")
 	moveFlag := flag.String("move","","Moves specified builds to an easier to access location")
 	buildFlag := flag.String("build","","Builds specified version")
+	typeFlag := flag.String("type","","Chooses the type to build")
 	shouldPrintVersion := flag.Bool("V",false,"Prints available versions")
 	shouldPrintPlatform := flag.Bool("P",false,"Prints available platforms")
+	shouldPrintTypes := flag.Bool("T",false,"Prints possible types")
 	shouldRemoveZips := flag.Bool("Z",false,"Removes version zip files")
 	
 	flag.Parse()
@@ -53,12 +74,21 @@ func main() {
 		fmt.Println("Available Platforms")
 		fmt.Println(strings.Join(platforms,"\n"))
 	}
+	if *shouldPrintTypes {
+		fmt.Println("Available types")
+		fmt.Println(strings.Join(types,"\n"))
+	}
 	if *downloadFlag != "" {
-		fmt.Println("Download Version Specified ",*downloadFlag)
+		fmt.Println("Download Version Specified:",*downloadFlag)
 		downloadInitialiser(*downloadFlag)
 	}
+	if *typeFlag != ""{
+		fmt.Println("Type specified:",*typeFlag)
+		typeInitialiser(*typeFlag)
+	}
+
 	if *buildFlag != ""{
-		fmt.Println("Build Version Specified ", *buildFlag)
+		fmt.Println("Build Version Specified:", *buildFlag)
 		buildInitialiser(*buildFlag)
 	}
 	if *shouldRemoveZips {
@@ -71,13 +101,6 @@ func main() {
 		printLogo()
 		interactiveMode()
 	}
-
-
-	// if len(args) == 0 {
-	
-	// 	fmt.Println("No arguments specified. Continuing in interactive mode.")
-	
-
 }
 
 func printLogo() {
@@ -153,9 +176,19 @@ func interactiveMode() {
 			buildver := command[1]
 			buildInitialiser(buildver)
 		case "move_built":
+			if len(command) != 2 {
+				fmt.Println("Usage: move_built <version>")
+				continue
+			}
 			moveBuilt(command[1])
 		case "cleanzips":
 			cleanZips()
+		case "type":
+			if len(command) != 2 {
+				fmt.Println("Usage: type <type>")
+				continue
+			}
+			typeInitialiser(command[1])
 		default:
 			fmt.Println("Command list:")
 			fmt.Println("exit")
@@ -163,6 +196,7 @@ func interactiveMode() {
 			fmt.Println("versions")
 			fmt.Println("move_built")
 			fmt.Println("cleanzips")
+			fmt.Println("type")
 		}
 	}
 }
@@ -269,6 +303,29 @@ func downloadInitialiser(version string){
 		//fmt.Println("Unzipped:\n" + strings.Join(files, "\n"))
 	}
 }
+func typeInitialiser(v string){
+	if !stringInSlice(v,types){
+		fmt.Println("Type invalid. Keeping type at",typ)
+	} else {
+		typ = v
+		typFlag = getFlagsFromType(v)
+	}
+}
+func getFlagsFromType(t string) string{
+	switch t {
+	case "editor":
+		return EDITOR_FLAGS
+	case "export":
+		return EXPORT_FLAGS
+	case "headless":
+		return HEADLESS_FLAGS
+	case "server":
+		return SERVER_FLAGS
+	default:
+		log.Panicln("Somehow called with incorrect value",t)
+		return ""
+	}
+}
 func buildInitialiser(version string){
 	if !stringInSlice(version, versions) && version != ALL_SELECTOR {
 		fmt.Println("Godot version not found or supported. To check versions type versions.")
@@ -309,13 +366,13 @@ func buildGodot(ver string) {
 		buildWithFlags(ver, strings.Fields("-j"+fmt.Sprint(runtime.NumCPU())+" platform=windows"))
 	case "linux":
 		if runtime.GOARCH == "amd64" {
-			buildWithFlags(ver, strings.Fields("-j"+fmt.Sprint(runtime.NumCPU())+" platform=x11"))
+			buildWithFlags(ver, strings.Fields(typFlag+" -j"+fmt.Sprint(runtime.NumCPU())))
 		} else if runtime.GOARCH == "arm64" {
 			os.Setenv("CCFLAGS", "-mtune=cortex-a72 -mcpu=cortex-a72 -mfloat-abi=hard -mlittle-endian -munaligned-access -mfpu=neon-fp-armv8")
-			buildWithFlags(ver, strings.Fields("platform=server target=release tools=no use_llvm=yes -j"+fmt.Sprint(runtime.NumCPU())))
+			buildWithFlags(ver, strings.Fields(typFlag+" use_llvm=yes -j"+fmt.Sprint(runtime.NumCPU())))
 		} else if runtime.GOARCH == "arm"{
 			os.Setenv("CCFLAGS", "-mtune=cortex-a72 -mcpu=cortex-a72 -mfloat-abi=hard -mlittle-endian -munaligned-access -mfpu=neon-fp-armv8")
-			buildWithFlags(ver, strings.Fields("platform=server target=release tools=no use_llvm=yes -j"+fmt.Sprint(runtime.NumCPU())))
+			buildWithFlags(ver, strings.Fields(typFlag+" use_llvm=yes -j"+fmt.Sprint(runtime.NumCPU())))
 		}
 	}
 }
@@ -359,8 +416,7 @@ func moveBuilt(ver string){
 		if err != nil {
 			fmt.Println(err)
 		}
-	}
-	
+	}	
 }
 func moveInitialiser(vers string){
 	if vers == ALL_SELECTOR {
