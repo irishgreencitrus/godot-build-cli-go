@@ -16,13 +16,11 @@ import (
 func main() {
 	args := os.Args[1:]
 	helper.TypeInitialiser(variables.CurrentType)
-	//runtimeName := os.Args[0]
 
 	downloadFlag := flag.String("download","","Downloads specified version")
 	moveFlag := flag.String("move","","Moves specified builds to an easier to access location")
 	buildFlag := flag.String("build","","Builds specified version")
 	typeFlag := flag.String("type","","Chooses the type to build")
-	//shouldBuildAll := flag.Bool("AA",false,"Builds all types")
 	shouldPrintVersion := flag.Bool("V",false,"Prints available versions")
 	shouldPrintPlatform := flag.Bool("P",false,"Prints available platforms")
 	shouldPrintTypes := flag.Bool("T",false,"Prints possible types")

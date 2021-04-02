@@ -12,7 +12,7 @@ import (
 	"github.com/irishgreencitrus/godot-build-cli-go/variables"
 	"github.com/irishgreencitrus/godot-build-cli-go/web"
 )
-
+// Prints the Godot Logo as ascii
 func PrintLogo() {
 	logo := [...]string{
 
@@ -41,7 +41,9 @@ func PrintLogo() {
 
 }
 
-
+// Starts a pseudo command line for you to type in pseudo commands.
+// Will probably be replaced by a different method using this
+// module in the future https://github.com/AlecAivazis/survey/
 func InteractiveMode() {
 	input := bufio.NewReader(os.Stdin)
 	for {

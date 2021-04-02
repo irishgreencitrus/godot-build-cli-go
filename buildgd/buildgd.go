@@ -11,6 +11,9 @@ import (
 	"runtime"
 	"strings"
 )
+// Starts building a version if it's in variables.Versions. If the version is all
+// it'll loop through every version building it one after another.
+// It'll also check if the source is available in the download/ directory
 func BuildInitialiser(version string){
 	if !helper.StringInSlice(version, variables.Versions) && version != variables.ALL_SELECTOR {
 		fmt.Println("Godot version not found or supported. To check versions type versions.")
@@ -36,6 +39,10 @@ func BuildInitialiser(version string){
 		}
 	}
 }
+// A better entry point than BuildInitialiser if you are building a custom tool.
+// Currently the actual building only supports linux/amd64, linux/arm, and linux/arm64
+// May expand to other platforms in the near future.
+// TIP: If you want to add another platform in a PR, add the method in here!
 func BuildGodot(ver string) {
 	switch runtime.GOOS {
 	//case "windows":
@@ -52,11 +59,9 @@ func BuildGodot(ver string) {
 		}
 	}
 }
+// Probably the best entrypoint if you are using this as a module.
+// Directly builds the versions using scons, following the output.
 func BuildWithFlags(vers string, flags []string) {
-
-	//for x := range flags{
-	//	fmt.Println(flags[x])
-	//}
 	cmd := exec.Command("scons", flags...)
 	cmd.Dir = fmt.Sprintf("download/godot-%s", vers)
 	var errb bytes.Buffer

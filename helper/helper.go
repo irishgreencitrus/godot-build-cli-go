@@ -117,7 +117,8 @@ func Unzip(src string, dest string) ([]string, error) {
 
 	return filenames, nil
 }
-// 
+// Arguably the most useful helper function in this file, allowing checking of 
+// strings in a list of strings. Used a lot when validating versions, for example
 func StringInSlice(a string, list []string) bool {
 	for _, b := range list {
 		if b == a {
@@ -126,6 +127,8 @@ func StringInSlice(a string, list []string) bool {
 	}
 	return false
 }
+// This function returns (NewType, NewTypeFlags) if the type is supported
+// otherwise it just returns the old type and flag.
 func TypeInitialiser(v string) (string,string){
 	if !StringInSlice(v,variables.Types){
 		
@@ -135,6 +138,9 @@ func TypeInitialiser(v string) (string,string){
 		return v, GetFlagsFromType(v)
 	}
 }
+
+// Returns flags for a type based on t.
+// Not recommended calling this with user input as it'll deliberatly error out if incorrect.
 func GetFlagsFromType(t string) string{
 	switch t {
 	case "editor":
