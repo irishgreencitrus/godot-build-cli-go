@@ -4,6 +4,7 @@ import (
 	"archive/zip"
 	"errors"
 	"fmt"
+	"math/big"
 	"io"
 	"io/fs"
 	"io/ioutil"
@@ -47,17 +48,24 @@ func MoveBuilt(ver string){
 		}
 	}	
 }
-func MoveInitialiser(vers string){
-	if vers == variables.ALL_SELECTOR {
-		fmt.Println("Moving all builds.")
-		for _,i := range variables.Versions {
-			MoveBuilt(i)
-		}
-	} else {
-		MoveBuilt(vers)
+func MoveInitialiser(vers []string){
+	fmt.Println("Moving builds.")
+	for _,i := range vers {
+		MoveBuilt(i)
 	}
 }
-
+func RenameBuilt(){
+	files, err := ioutil.ReadDir("builds")
+	if errors.Is(err, fs.ErrNotExist){
+		fmt.Println("Builds directory doesn't exist")
+	}
+	for _, f := range files {
+		os.Rename("builds/"+f.Name(),"builds/"+strings.ReplaceAll(f.Name(),"godot.x11.opt.tools",variables.FriendlyNames["godot.x11.opt.tools"]))
+		os.Rename("builds/"+f.Name(),"builds/"+strings.ReplaceAll(f.Name(),"godot.x11.opt",variables.FriendlyNames["godot.x11.opt"]))
+		os.Rename("builds/"+f.Name(),"builds/"+strings.ReplaceAll(f.Name(),"godot_server.x11.opt.tools",variables.FriendlyNames["godot_server.x11.opt.tools"]))
+		os.Rename("builds/"+f.Name(),"builds/"+strings.ReplaceAll(f.Name(),"godot_server.x11.opt",variables.FriendlyNames["godot_server.x11.opt"]))
+	}
+}
 // This function is stolen from
 // https://golangcode.com/unzip-files-in-go/
 // Unzips the file keeping directory structure
@@ -127,17 +135,7 @@ func StringInSlice(a string, list []string) bool {
 	}
 	return false
 }
-// This function returns (NewType, NewTypeFlags) if the type is supported
-// otherwise it just returns the old type and flag.
-func TypeInitialiser(v string) (string,string){
-	if !StringInSlice(v,variables.Types){
-		
-		fmt.Println("Type invalid. Keeping type at last")
-		return variables.CurrentType, variables.CurrentTypeFlag
-	} else {
-		return v, GetFlagsFromType(v)
-	}
-}
+
 
 // Returns flags for a type based on t.
 // Not recommended calling this with user input as it'll deliberatly error out if incorrect.
@@ -156,3 +154,22 @@ func GetFlagsFromType(t string) string{
 		return ""
 	}
 }
+func ReverseList(list []string) []string{
+    s := list
+    for i, j := 0, len(s)-1; i < j; i, j = i+1, j-1 {
+        s[i], s[j] = s[j], s[i]
+    }
+    return s
+}
+func ListWithBitFilter(original_list []string, filter byte) []string{
+    in := ReverseList(original_list)
+    f := big.NewInt(int64(filter))
+	out := []string{}
+	for i := range in {
+		if f.Bit(i) == 1{
+			out = append(out,in[i])
+		} 		
+	}
+	return out
+}
+

@@ -1,5 +1,5 @@
 # Godot Build CLI
-
+[![Go Reference](https://pkg.go.dev/badge/github.com/irishgreencitrus/godot-build-cli-go.svg)](https://pkg.go.dev/github.com/irishgreencitrus/godot-build-cli-go)
 - [Godot Build CLI](#godot-build-cli)
   - [Prerequisites](#prerequisites)
   - [Installation](#installation)

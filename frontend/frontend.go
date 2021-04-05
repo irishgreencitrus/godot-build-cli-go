@@ -1,18 +1,15 @@
 package frontend
 
 import (
-	"bufio"
 	"fmt"
-	"os"
 	"runtime"
-	"strings"
-
+	"github.com/AlecAivazis/survey/v2"
 	"github.com/irishgreencitrus/godot-build-cli-go/buildgd"
 	"github.com/irishgreencitrus/godot-build-cli-go/helper"
 	"github.com/irishgreencitrus/godot-build-cli-go/variables"
 	"github.com/irishgreencitrus/godot-build-cli-go/web"
 )
-// Prints the Godot Logo as ascii
+// Prints the Godot Logo as ascii art
 func PrintLogo() {
 	logo := [...]string{
 
@@ -40,68 +37,47 @@ func PrintLogo() {
 	fmt.Printf("Detected Architecture: %s\n\n", runtime.GOARCH)
 
 }
-
-// Starts a pseudo command line for you to type in pseudo commands.
-// Will probably be replaced by a different method using this
-// module in the future https://github.com/AlecAivazis/survey/
-func InteractiveMode() {
-	input := bufio.NewReader(os.Stdin)
-	for {
-		fmt.Printf("> ")
-		input, _ := input.ReadString('\n')
-		input = strings.Replace(input, "\n", "", -1)
-		input = strings.Replace(input, "\r", "", -1)
-		command := strings.Split(input, " ")
-		commandword := command[0]
-
-		//fmt.Println("\n")
-		//fmt.Println(command)
-		switch commandword {
-		case "exit":
-			fmt.Println("Exiting...")
-			os.Exit(0)
-		case "versions":
-			fmt.Println("Versions available:")
-			for i := range variables.Versions {
-				fmt.Println(variables.Versions[i])
-			}
-		case "download":
-			if len(command) != 2 {
-				fmt.Println("Usage: download <version>")
-				continue
-			}
-			chosenversion := command[1]
-			web.DownloadInitialiser(chosenversion)
-			
-		case "build":
-			if len(command) != 2 {
-				fmt.Println("Usage: build <version>")
-				continue
-			}
-			buildver := command[1]
-			buildgd.BuildInitialiser(buildver)
-		case "move_built":
-			if len(command) != 2 {
-				fmt.Println("Usage: move_built <version>")
-				continue
-			}
-			helper.MoveBuilt(command[1])
-		case "cleanzips":
-			helper.CleanZips(variables.Versions)
-		case "type":
-			if len(command) != 2 {
-				fmt.Println("Usage: type <type>")
-				continue
-			}
-			variables.CurrentType, variables.CurrentTypeFlag = helper.TypeInitialiser(command[1])
-		default:
-			fmt.Println("Command list:")
-			fmt.Println("exit")
-			fmt.Println("build")
-			fmt.Println("versions")
-			fmt.Println("move_built")
-			fmt.Println("cleanzips")
-			fmt.Println("type")
-		}
+// New version of the old interactive mode.
+// About 100x more intuative than the old one.
+func SurveyMode(){
+	survey.Ask(variables.ToolQuestions,&variables.ToolAnswers,
+		survey.WithIcons(
+			func(is *survey.IconSet) {
+				
+				is.Error.Text = "✗"
+				is.Error.Format = "red+hb"
+	
+				is.Question.Text = "⁇"
+				is.Question.Format = "white"
+	
+				is.SelectFocus.Text = "»"
+				is.SelectFocus.Format = "white+hb"
+	
+				is.MarkedOption.Text = "✓"
+				is.MarkedOption.Format = "green"
+	
+				is.UnmarkedOption.Text = "✗"
+				is.UnmarkedOption.Format = "red"
+			},
+		),
+	)
+	//fmt.Println(variables.ToolAnswers)
+	//fmt.Println(variables.ToolQuestions)
+	
+	web.DownloadInitialiser(variables.ToolAnswers.DownloadVer)
+	if variables.ToolAnswers.RemoveZips {
+		helper.CleanZips(variables.ToolAnswers.DownloadVer)
+	}
+	buildgd.BuildInitialiser(variables.ToolAnswers.BinaryTypes , variables.ToolAnswers.BuildVer)
+	if variables.ToolAnswers.MoveBuilt {
+		helper.MoveInitialiser(variables.ToolAnswers.BuildVer)
+	}
+	if variables.ToolAnswers.RenameFriendly {
+		helper.RenameBuilt()
 	}
 }
+
+
+
+
+

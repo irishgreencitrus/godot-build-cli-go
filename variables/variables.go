@@ -1,5 +1,6 @@
 package variables
 
+import "github.com/AlecAivazis/survey/v2"
 
 const ALL_SELECTOR string = "all"
 // Supported versions for building
@@ -31,17 +32,67 @@ var Types = []string{
 	"headless",
 	"server",
 }
-// Flags for CurrentType
-var CurrentTypeFlag = ""
-// One of the types in Types[]
-var CurrentType = Types[0]
 // More human readable names for the output build files. 
 // Will be used in helper's move built methods in the future
+// Example "3.2.3-stable.godot_server.x11.opt.64.llvm" -> "3.2.3-stable.server.64.llvm"
 var FriendlyNames = map[string]string{
 	"godot.x11.opt.tools" : "editor",
 	"godot.x11.opt" : "export",
 	"godot_server.x11.opt" : "server",
-	//? "godot_server.x11.opt.tools" : "headless",
-	
-	
+	"godot_server.x11.opt.tools" : "headless",
 }
+var ToolQuestions = []*survey.Question{
+	{
+		Name: "downloadver",
+		Prompt: &survey.MultiSelect{
+			Message: "Choose versions to download",
+			Options: Versions, 
+		},
+	},
+	{
+		Name: "buildver",
+        Prompt: &survey.MultiSelect{
+			Message: "Choose versions to build",
+			Options: Versions, 
+		},
+	},
+	{
+		Name: "binarytypes",
+		Prompt: &survey.MultiSelect{
+			Message: "Choose binary types to build",
+			Options: Types,
+			Default: []string{ Types[0] },
+		},
+	},
+	{
+		Name: "removezips",
+		Prompt: &survey.Confirm{
+			Message: "Remove downloaded zip files?",
+			Default: false,
+		},
+	},
+	{
+		Name: "movebuilt",
+		Prompt: &survey.Confirm{
+			Message: "Move built binaries to build/ ?",
+			Default: false,
+		},
+	},
+	{
+		Name: "renamefriendly",
+		Prompt: &survey.Confirm{
+			Message: "Rename builds to a more friendly name?",
+			Default: false,
+		},
+	},
+}
+type ToolAnswerType struct {
+	DownloadVer []string
+	BuildVer []string
+	BinaryTypes []string
+	RemoveZips bool
+	MoveBuilt bool
+	RenameFriendly bool
+}
+var ToolAnswers ToolAnswerType
+
