@@ -96,7 +96,7 @@ Example of listing the versions
 $ ./go-build-cli-go -V
 ```
 
-Example of downloading and building 3.2.3-stable
+Example of downloading and building 3.1-stable
 
 ```
 $ ./go-build-cli-go -download 1 -build 1
