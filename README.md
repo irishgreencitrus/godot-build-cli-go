@@ -1,5 +1,5 @@
 # Godot Build CLI
-[![Go Reference](https://pkg.go.dev/badge/github.com/irishgreencitrus/godot-build-cli-go.svg)](https://pkg.go.dev/github.com/irishgreencitrus/godot-build-cli-go)
+[![Go Reference](https://pkg.go.dev/badge/github.com/irishgreencitrus/godot-build-cli-go.svg)](https://pkg.go.dev/github.com/irishgreencitrus/godot-build-cli-go) [![Travis](https://travis-ci.com/irishgreencitrus/godot-build-cli-go.svg?branch=main)](https://travis-ci.com/github/irishgreencitrus/godot-build-cli-go)
 - [Godot Build CLI](#godot-build-cli)
   - [Prerequisites](#prerequisites)
     - [Command for installing all requirements on Raspberry Pi OS](#command-for-installing-all-requirements-on-raspberry-pi-os)
