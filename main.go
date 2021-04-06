@@ -24,7 +24,7 @@ func main() {
 	shouldPrintPlatform := flag.Bool("P",false,"Prints available platforms")
 	shouldPrintTypes := flag.Bool("T",false,"Prints possible types")
 	shouldRemoveZips := flag.Bool("Z",false,"Removes version zip files")
-    	
+    shouldRenameFriendly := flag.Bool("R",false,"Renames builds to more readable names")    	
 	flag.Parse()
 	if *shouldPrintVersion {
 		fmt.Println("Available Versions:")
@@ -58,7 +58,9 @@ func main() {
         c := helper.ListWithBitFilter(variables.Versions, byte(*moveFlag))
 		helper.MoveInitialiser(c)
 	}
-    
+    if *shouldRenameFriendly {
+        helper.RenameBuilt()
+    } 
 	if len(args) == 0 {
 		frontend.PrintLogo()
 		frontend.SurveyMode()

@@ -2,6 +2,7 @@
 [![Go Reference](https://pkg.go.dev/badge/github.com/irishgreencitrus/godot-build-cli-go.svg)](https://pkg.go.dev/github.com/irishgreencitrus/godot-build-cli-go)
 - [Godot Build CLI](#godot-build-cli)
   - [Prerequisites](#prerequisites)
+    - [Command for installing all requirements on Raspberry Pi OS](#command-for-installing-all-requirements-on-raspberry-pi-os)
   - [Installation](#installation)
   - [Usage](#usage)
     - [An important change!](#an-important-change)
@@ -9,6 +10,11 @@
       - [Type Guide](#type-guide)
     - [Help and common usage](#help-and-common-usage)
 ## Prerequisites
+### Command for installing all requirements on Raspberry Pi OS
+```sh
+sudo apt-get install build-essential scons pkg-config libx11-dev libxcursor-dev libxinerama-dev libgl1-mesa-dev libglu-dev libasound2-dev libpulse-dev libudev-dev libxi-dev libxrandr-dev yasm clang
+```
+> If you use this command you can skip over the link below. However this is only if you are installing on Pi OS. If you are using any other distro follow the link instead as well as adding clang on the end.
 
 In order to use the build CLI at all, you should install the dependencies for compiling godot [here](https://docs.godotengine.org/en/stable/development/compiling/compiling_for_x11.html#distro-specific-one-liners)
 >### IMPORTANT NOTICE!!
@@ -17,7 +23,7 @@ In order to use the build CLI at all, you should install the dependencies for co
 >scons: building terminated because of errors.
 >sh: 1: clang++: not found
 >```
->you don't have clang installed! Install it using your package manager before opening an issue
+>You don't have clang installed! Install it using your package manager before opening an issue
 
 Also if your OS is not in this list, consider it useless for now. However downloading should work no matter the OS. 
 ```
