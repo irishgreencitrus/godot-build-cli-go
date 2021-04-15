@@ -9,6 +9,7 @@ import (
 
 	"github.com/irishgreencitrus/godot-build-cli-go/helper"
 )
+
 // Downloads the chosen Godot version source as on the github release.
 // Although this is only intended to work with the supported versions, you might get lucky with newer
 // or older versions on the github. However I have only tested the versions in variables.go
@@ -21,13 +22,14 @@ func DownloadVersion(chosenversion string) {
 	helper.Unzip(path, "download")
 	fmt.Println("Successfully Unzipped", path)
 }
-// Initialises the downloading for godot version. This is more recommended than DownloadVersion as it 
+
+// Initialises the downloading for godot version. This is more recommended than DownloadVersion as it
 // checks against supported version and also has support for downloading every version
 // by simply calling DownloadInitialiser("all")
-func DownloadInitialiser(versions []string){
+func DownloadInitialiser(versions []string) {
 	var wg sync.WaitGroup
-	for _, v := range versions{
-		fmt.Printf("Downloading %s to downloads/\n",v)
+	for _, v := range versions {
+		fmt.Printf("Downloading %s to downloads/\n", v)
 		wg.Add(1)
 		go func(v string) {
 			DownloadVersion(v)
@@ -36,6 +38,7 @@ func DownloadInitialiser(versions []string){
 	}
 	wg.Wait()
 }
+
 // This function is stolen from
 // https://golangcode.com/download-a-file-from-a-url/
 // It writes to the file as it downloads it to prevent it from loading the entire file into memory.

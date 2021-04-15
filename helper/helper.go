@@ -4,68 +4,69 @@ import (
 	"archive/zip"
 	"errors"
 	"fmt"
-	"math/big"
+	"github.com/irishgreencitrus/godot-build-cli-go/variables"
 	"io"
 	"io/fs"
 	"io/ioutil"
 	"log"
+	"math/big"
 	"os"
 	"path/filepath"
 	"strings"
-	"github.com/irishgreencitrus/godot-build-cli-go/variables"
 )
 
-func CleanZips(v []string){
-	for _,i := range v {
-		err := os.Remove(i+".zip")
-		if err != nil{
-			fmt.Println(i+".zip not found. Can't be removed.")
+func CleanZips(v []string) {
+	for _, i := range v {
+		err := os.Remove(i + ".zip")
+		if err != nil {
+			fmt.Println(i + ".zip not found. Can't be removed.")
 		} else {
-			fmt.Println("Removed "+i+".zip")
+			fmt.Println("Removed " + i + ".zip")
 		}
-		
+
 	}
 }
-func MoveBuilt(ver string){
-	files,err := ioutil.ReadDir("download/godot-"+ver+"/bin")
-	if errors.Is(err, fs.ErrNotExist){
-		_,er := ioutil.ReadDir("download/godot-"+ver)
-		if errors.Is(er,fs.ErrNotExist){
+func MoveBuilt(ver string) {
+	files, err := ioutil.ReadDir("download/godot-" + ver + "/bin")
+	if errors.Is(err, fs.ErrNotExist) {
+		_, er := ioutil.ReadDir("download/godot-" + ver)
+		if errors.Is(er, fs.ErrNotExist) {
 			fmt.Println("This version doesn't exist in downloads")
 		} else {
 			fmt.Println("This version hasn't been built yet. Build it using build <version>.")
 		}
-		
+
 	}
-	for _,f := range files{
+	for _, f := range files {
 		fmt.Println("Moving: " + f.Name())
-		if _,er := os.Stat("builds"); os.IsNotExist(er){
-			os.Mkdir("builds",0755)
+		if _, er := os.Stat("builds"); os.IsNotExist(er) {
+			os.Mkdir("builds", 0755)
 		}
-		err := os.Rename("download/godot-"+ver+"/bin/"+f.Name(),"builds/"+ver+"."+f.Name())
+		err := os.Rename("download/godot-"+ver+"/bin/"+f.Name(), "builds/"+ver+"."+f.Name())
 		if err != nil {
 			fmt.Println(err)
 		}
-	}	
+	}
 }
-func MoveInitialiser(vers []string){
+func MoveInitialiser(vers []string) {
 	fmt.Println("Moving builds.")
-	for _,i := range vers {
+	for _, i := range vers {
 		MoveBuilt(i)
 	}
 }
-func RenameBuilt(){
+func RenameBuilt() {
 	files, err := ioutil.ReadDir("builds")
-	if errors.Is(err, fs.ErrNotExist){
+	if errors.Is(err, fs.ErrNotExist) {
 		fmt.Println("Builds directory doesn't exist")
 	}
 	for _, f := range files {
-		os.Rename("builds/"+f.Name(),"builds/"+strings.ReplaceAll(f.Name(),"godot.x11.opt.tools",variables.FriendlyNames["godot.x11.opt.tools"]))
-		os.Rename("builds/"+f.Name(),"builds/"+strings.ReplaceAll(f.Name(),"godot.x11.opt",variables.FriendlyNames["godot.x11.opt"]))
-		os.Rename("builds/"+f.Name(),"builds/"+strings.ReplaceAll(f.Name(),"godot_server.x11.opt.tools",variables.FriendlyNames["godot_server.x11.opt.tools"]))
-		os.Rename("builds/"+f.Name(),"builds/"+strings.ReplaceAll(f.Name(),"godot_server.x11.opt",variables.FriendlyNames["godot_server.x11.opt"]))
+		os.Rename("builds/"+f.Name(), "builds/"+strings.ReplaceAll(f.Name(), "godot.x11.opt.tools", variables.FriendlyNames["godot.x11.opt.tools"]))
+		os.Rename("builds/"+f.Name(), "builds/"+strings.ReplaceAll(f.Name(), "godot.x11.opt", variables.FriendlyNames["godot.x11.opt"]))
+		os.Rename("builds/"+f.Name(), "builds/"+strings.ReplaceAll(f.Name(), "godot_server.x11.opt.tools", variables.FriendlyNames["godot_server.x11.opt.tools"]))
+		os.Rename("builds/"+f.Name(), "builds/"+strings.ReplaceAll(f.Name(), "godot_server.x11.opt", variables.FriendlyNames["godot_server.x11.opt"]))
 	}
 }
+
 // This function is stolen from
 // https://golangcode.com/unzip-files-in-go/
 // Unzips the file keeping directory structure
@@ -125,7 +126,8 @@ func Unzip(src string, dest string) ([]string, error) {
 
 	return filenames, nil
 }
-// Arguably the most useful helper function in this file, allowing checking of 
+
+// Arguably the most useful helper function in this file, allowing checking of
 // strings in a list of strings. Used a lot when validating versions, for example
 func StringInSlice(a string, list []string) bool {
 	for _, b := range list {
@@ -136,10 +138,9 @@ func StringInSlice(a string, list []string) bool {
 	return false
 }
 
-
 // Returns flags for a type based on t.
 // Not recommended calling this with user input as it'll deliberatly error out if incorrect.
-func GetFlagsFromType(t string) string{
+func GetFlagsFromType(t string) string {
 	switch t {
 	case "editor":
 		return variables.EDITOR_FLAGS
@@ -150,26 +151,25 @@ func GetFlagsFromType(t string) string{
 	case "server":
 		return variables.SERVER_FLAGS
 	default:
-		log.Panicln("Somehow called with incorrect value",t)
+		log.Panicln("Somehow called with incorrect value", t)
 		return ""
 	}
 }
-func ReverseList(list []string) []string{
-    s := list
-    for i, j := 0, len(s)-1; i < j; i, j = i+1, j-1 {
-        s[i], s[j] = s[j], s[i]
-    }
-    return s
+func ReverseList(list []string) []string {
+	s := list
+	for i, j := 0, len(s)-1; i < j; i, j = i+1, j-1 {
+		s[i], s[j] = s[j], s[i]
+	}
+	return s
 }
-func ListWithBitFilter(original_list []string, filter byte) []string{
-    in := ReverseList(original_list)
-    f := big.NewInt(int64(filter))
+func ListWithBitFilter(original_list []string, filter byte) []string {
+	in := ReverseList(original_list)
+	f := big.NewInt(int64(filter))
 	out := []string{}
 	for i := range in {
-		if f.Bit(i) == 1{
-			out = append(out,in[i])
-		} 		
+		if f.Bit(i) == 1 {
+			out = append(out, in[i])
+		}
 	}
 	return out
 }
-

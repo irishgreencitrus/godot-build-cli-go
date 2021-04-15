@@ -3,6 +3,7 @@ package variables
 import "github.com/AlecAivazis/survey/v2"
 
 const ALL_SELECTOR string = "all"
+
 // Supported versions for building
 var Versions = []string{
 	"3.2.3-stable",
@@ -13,18 +14,21 @@ var Versions = []string{
 	"3.1.1-stable",
 	"3.1-stable",
 }
+
 // Supported platforms for building
 var Platforms = []string{
 	"linux/amd64",
 	"linux/arm",
 	"linux/arm64",
 }
+
 const (
-	EDITOR_FLAGS = "platform=x11 target=release_debug tools=yes"
-	EXPORT_FLAGS = "platform=x11 target=release tools=no"
+	EDITOR_FLAGS   = "platform=x11 target=release_debug tools=yes"
+	EXPORT_FLAGS   = "platform=x11 target=release tools=no"
 	HEADLESS_FLAGS = "platform=server target=release_debug tools=yes"
-	SERVER_FLAGS = "platform=server target=release tools=no"
+	SERVER_FLAGS   = "platform=server target=release tools=no"
 )
+
 // Supported binaries or types for building
 var Types = []string{
 	"editor",
@@ -32,28 +36,29 @@ var Types = []string{
 	"headless",
 	"server",
 }
-// More human readable names for the output build files. 
+
+// More human readable names for the output build files.
 // Will be used in helper's move built methods in the future
 // Example "3.2.3-stable.godot_server.x11.opt.64.llvm" -> "3.2.3-stable.server.64.llvm"
 var FriendlyNames = map[string]string{
-	"godot.x11.opt.tools" : "editor",
-	"godot.x11.opt" : "export",
-	"godot_server.x11.opt" : "server",
-	"godot_server.x11.opt.tools" : "headless",
+	"godot.x11.opt.tools":        "editor",
+	"godot.x11.opt":              "export",
+	"godot_server.x11.opt":       "server",
+	"godot_server.x11.opt.tools": "headless",
 }
 var ToolQuestions = []*survey.Question{
 	{
 		Name: "downloadver",
 		Prompt: &survey.MultiSelect{
 			Message: "Choose versions to download",
-			Options: Versions, 
+			Options: Versions,
 		},
 	},
 	{
 		Name: "buildver",
-        Prompt: &survey.MultiSelect{
+		Prompt: &survey.MultiSelect{
 			Message: "Choose versions to build",
-			Options: Versions, 
+			Options: Versions,
 		},
 	},
 	{
@@ -61,7 +66,7 @@ var ToolQuestions = []*survey.Question{
 		Prompt: &survey.MultiSelect{
 			Message: "Choose binary types to build",
 			Options: Types,
-			Default: []string{ Types[0] },
+			Default: []string{Types[0]},
 		},
 	},
 	{
@@ -86,13 +91,14 @@ var ToolQuestions = []*survey.Question{
 		},
 	},
 }
+
 type ToolAnswerType struct {
-	DownloadVer []string
-	BuildVer []string
-	BinaryTypes []string
-	RemoveZips bool
-	MoveBuilt bool
+	DownloadVer    []string
+	BuildVer       []string
+	BinaryTypes    []string
+	RemoveZips     bool
+	MoveBuilt      bool
 	RenameFriendly bool
 }
-var ToolAnswers ToolAnswerType
 
+var ToolAnswers ToolAnswerType

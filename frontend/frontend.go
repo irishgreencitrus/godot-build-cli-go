@@ -2,13 +2,14 @@ package frontend
 
 import (
 	"fmt"
-	"runtime"
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/irishgreencitrus/godot-build-cli-go/buildgd"
 	"github.com/irishgreencitrus/godot-build-cli-go/helper"
 	"github.com/irishgreencitrus/godot-build-cli-go/variables"
 	"github.com/irishgreencitrus/godot-build-cli-go/web"
+	"runtime"
 )
+
 // Prints the Godot Logo as ascii art
 func PrintLogo() {
 	logo := [...]string{
@@ -37,25 +38,26 @@ func PrintLogo() {
 	fmt.Printf("Detected Architecture: %s\n\n", runtime.GOARCH)
 
 }
+
 // New version of the old interactive mode.
 // About 100x more intuative than the old one.
-func SurveyMode(){
-	survey.Ask(variables.ToolQuestions,&variables.ToolAnswers,
+func SurveyMode() {
+	survey.Ask(variables.ToolQuestions, &variables.ToolAnswers,
 		survey.WithIcons(
 			func(is *survey.IconSet) {
-				
+
 				is.Error.Text = "✗"
 				is.Error.Format = "red+hb"
-	
+
 				is.Question.Text = "⁇"
 				is.Question.Format = "white"
-	
+
 				is.SelectFocus.Text = "»"
 				is.SelectFocus.Format = "white+hb"
-	
+
 				is.MarkedOption.Text = "✓"
 				is.MarkedOption.Format = "green"
-	
+
 				is.UnmarkedOption.Text = "✗"
 				is.UnmarkedOption.Format = "red"
 			},
@@ -63,12 +65,12 @@ func SurveyMode(){
 	)
 	//fmt.Println(variables.ToolAnswers)
 	//fmt.Println(variables.ToolQuestions)
-	
+
 	web.DownloadInitialiser(variables.ToolAnswers.DownloadVer)
 	if variables.ToolAnswers.RemoveZips {
 		helper.CleanZips(variables.ToolAnswers.DownloadVer)
 	}
-	buildgd.BuildInitialiser(variables.ToolAnswers.BinaryTypes , variables.ToolAnswers.BuildVer)
+	buildgd.BuildInitialiser(variables.ToolAnswers.BinaryTypes, variables.ToolAnswers.BuildVer)
 	if variables.ToolAnswers.MoveBuilt {
 		helper.MoveInitialiser(variables.ToolAnswers.BuildVer)
 	}
@@ -76,8 +78,3 @@ func SurveyMode(){
 		helper.RenameBuilt()
 	}
 }
-
-
-
-
-
