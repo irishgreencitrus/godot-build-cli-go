@@ -54,6 +54,7 @@ In the last commit you could only build/download/move one version or all of them
 In the latest commit you can now build any permutation of versions using this guide. One means download/build/move that version and zero means don't
 #### Version Guide
 ```
+3.3.1-stable  - 1
 3.3-stable    - 1
 3.2.3-stable  - 1
 3.2.2-stable  - 1
@@ -63,7 +64,7 @@ In the latest commit you can now build any permutation of versions using this gu
 3.1.1-stable  - 1
 3.1-stable    - 1
 ```
-11111111 in decimal is 255 - so to build every version you need to put the flag 255. Bits are in this order! That means read from top to bottom. Here's a guide for types
+111111111 in decimal is 511 - so to build every version you need to put the flag 511. Bits are in this order! That means read from top to bottom. Here's a guide for types
 #### Type Guide
 ```
 editor    - 1
@@ -95,7 +96,7 @@ Usage of ./godot-build-cli-go:
 Example of downloading every version supported building it moving the binaries and removing the zips
 
 ```
-$ ./go-build-cli-go -download 255 -build 255 -Z -move all
+$ ./go-build-cli-go -download 511 -build 511 -Z -move all
 ```
 
 Example of listing the versions
