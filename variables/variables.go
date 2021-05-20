@@ -6,7 +6,7 @@ const ALL_SELECTOR string = "all"
 
 // Supported versions for building
 var Versions = []string{
-	"3.3.1-stable"
+	"3.3.1-stable",
 	"3.3-stable",
 	"3.2.3-stable",
 	"3.2.2-stable",
