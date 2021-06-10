@@ -72,7 +72,7 @@ func SurveyMode() {
 	}
 	buildgd.BuildInitialiser(variables.ToolAnswers.BinaryTypes, variables.ToolAnswers.BuildVer)
 	if variables.ToolAnswers.MoveBuilt {
-		helper.MoveInitialiser(variables.ToolAnswers.BuildVer)
+		helper.MoveInitialiser(variables.Versions)
 	}
 	if variables.ToolAnswers.RenameFriendly {
 		helper.RenameBuilt()
