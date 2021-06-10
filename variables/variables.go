@@ -31,7 +31,10 @@ const (
 	HEADLESS_FLAGS = "platform=server target=release_debug tools=yes"
 	SERVER_FLAGS   = "platform=server target=release tools=no"
 )
-
+var Bits = []string{
+	"32",
+	"64",
+}
 // Supported binaries or types for building
 var Types = []string{
 	"editor",
@@ -73,6 +76,14 @@ var ToolQuestions = []*survey.Question{
 		},
 	},
 	{
+		Name: "bits",
+		Prompt: &survey.Select{
+			Message: "64bit or 32bit?",
+			Options: Bits,
+			Default: Bits[0],
+		},
+	},
+	{
 		Name: "removezips",
 		Prompt: &survey.Confirm{
 			Message: "Remove downloaded zip files?",
@@ -99,6 +110,7 @@ type ToolAnswerType struct {
 	DownloadVer    []string
 	BuildVer       []string
 	BinaryTypes    []string
+	Bits           string
 	RemoveZips     bool
 	MoveBuilt      bool
 	RenameFriendly bool

@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/irishgreencitrus/godot-build-cli-go/helper"
+	"github.com/irishgreencitrus/godot-build-cli-go/variables"
 	"os"
 	"os/exec"
 	"runtime"
@@ -37,7 +38,7 @@ func BuildGodot(ver string, typ string) {
 			BuildWithFlags(ver, strings.Fields(typ+" -j"+fmt.Sprint(runtime.NumCPU())))
 		} else if runtime.GOARCH == "arm64" {
 			os.Setenv("CCFLAGS", "-mtune=cortex-a72 -mcpu=cortex-a72 -mfloat-abi=hard -mlittle-endian -munaligned-access -mfpu=neon-fp-armv8")
-			BuildWithFlags(ver, strings.Fields(typ+" use_llvm=yes -j"+fmt.Sprint(runtime.NumCPU())))
+			BuildWithFlags(ver, strings.Fields("bits="+variables.ToolAnswers.Bits+" "+typ+" use_llvm=yes -j"+fmt.Sprint(runtime.NumCPU())))
 		} else if runtime.GOARCH == "arm" {
 			os.Setenv("CCFLAGS", "-mtune=cortex-a72 -mcpu=cortex-a72 -mfloat-abi=hard -mlittle-endian -munaligned-access -mfpu=neon-fp-armv8")
 			BuildWithFlags(ver, strings.Fields(typ+" use_llvm=yes -j"+fmt.Sprint(runtime.NumCPU())))
