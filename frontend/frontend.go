@@ -3,10 +3,10 @@ package frontend
 import (
 	"fmt"
 	"github.com/AlecAivazis/survey/v2"
-	"github.com/irishgreencitrus/godot-build-cli-go/buildgd"
-	"github.com/irishgreencitrus/godot-build-cli-go/helper"
-	"github.com/irishgreencitrus/godot-build-cli-go/variables"
-	"github.com/irishgreencitrus/godot-build-cli-go/web"
+	"github.com/irishgreencitrus/godot-build-cli-go/v2/buildgd"
+	"github.com/irishgreencitrus/godot-build-cli-go/v2/helper"
+	"github.com/irishgreencitrus/godot-build-cli-go/v2/variables"
+	"github.com/irishgreencitrus/godot-build-cli-go/v2/web"
 	"runtime"
 )
 

@@ -3,7 +3,7 @@ package web
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/irishgreencitrus/godot-build-cli-go/helper"
+	"github.com/irishgreencitrus/godot-build-cli-go/v2/helper"
 	"io"
 	"io/ioutil"
 	"net/http"

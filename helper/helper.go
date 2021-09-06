@@ -4,7 +4,7 @@ import (
 	"archive/zip"
 	"errors"
 	"fmt"
-	"github.com/irishgreencitrus/godot-build-cli-go/variables"
+	"github.com/irishgreencitrus/godot-build-cli-go/v2/variables"
 	"io"
 	"io/fs"
 	"io/ioutil"
