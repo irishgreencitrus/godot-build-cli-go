@@ -2,4 +2,7 @@ module github.com/irishgreencitrus/godot-build-cli-go
 
 go 1.16
 
-require github.com/AlecAivazis/survey/v2 v2.3.1
+require (
+	github.com/AlecAivazis/survey/v2 v2.3.1
+	golang.org/x/tools/gopls v0.7.1 // indirect
+)

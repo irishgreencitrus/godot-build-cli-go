@@ -15,7 +15,19 @@ import (
 
 func main() {
 	args := os.Args[1:]
+	releaseStructsAvailable := web.GetReleasesFromGithubAPI()
+	releasesAvailable := []string{}
+	for _,item := range releaseStructsAvailable {
+			if !item.Prerelease {
+					if strings.HasPrefix(item.TagName,"3"){
+					releasesAvailable = append(releasesAvailable,item.TagName)
 
+					}
+
+			}
+	}
+	variables.Versions = releasesAvailable
+	variables.InitQuestions()
 	downloadFlag := flag.Int("download", 0, "Downloads specified version")
 	moveFlag := flag.Int("move", 0, "Moves specified builds to an easier to access location")
 	buildFlag := flag.Int("build", 0, "Builds specified version")

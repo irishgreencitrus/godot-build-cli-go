@@ -1,14 +1,52 @@
 package web
 
 import (
+	"encoding/json"
 	"fmt"
+	"github.com/irishgreencitrus/godot-build-cli-go/helper"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"sync"
-
-	"github.com/irishgreencitrus/godot-build-cli-go/helper"
 )
+
+type GithubReleaseFormat []struct {
+	URL             string `json:"url"`
+	AssetsURL       string `json:"assets_url"`
+	UploadURL       string `json:"upload_url"`
+	HTMLURL         string `json:"html_url"`
+	ID              int    `json:"id"`
+	NodeID          string `json:"node_id"`
+	TagName         string `json:"tag_name"`
+	TargetCommitish string `json:"target_commitish"`
+	Name            string `json:"name"`
+	Draft           bool   `json:"draft"`
+	Prerelease      bool   `json:"prerelease"`
+	TarballURL      string `json:"tarball_url"`
+	ZipballURL      string `json:"zipball_url"`
+}
+
+func GetReleasesFromGithubAPI() GithubReleaseFormat {
+	url := "https://api.github.com/repos/godotengine/godot/releases"
+	client := &http.Client{}
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		fmt.Print(err.Error())
+	}
+	resp, err := client.Do(req)
+	if err != nil {
+		fmt.Print(err.Error())
+	}
+	defer resp.Body.Close()
+	bodyBytes, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		fmt.Print(err.Error())
+	}
+	var response GithubReleaseFormat
+	json.Unmarshal(bodyBytes, &response)
+	return response
+}
 
 // Downloads the chosen Godot version source as on the github release.
 // Although this is only intended to work with the supported versions, you might get lucky with newer
