@@ -1,4 +1,4 @@
-module github.com/irishgreencitrus/godot-build-cli-go
+module github.com/irishgreencitrus/godot-build-cli-go/v2
 
 go 1.16
 
