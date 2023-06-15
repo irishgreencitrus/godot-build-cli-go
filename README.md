@@ -1,3 +1,4 @@
+> I no longer update this project! Please consider something else which suits your needs
 # Godot Build CLI
 [![Go Reference](https://pkg.go.dev/badge/github.com/irishgreencitrus/godot-build-cli-go.svg)](https://pkg.go.dev/github.com/irishgreencitrus/godot-build-cli-go) [![Travis](https://travis-ci.com/irishgreencitrus/godot-build-cli-go.svg?branch=main)](https://travis-ci.com/github/irishgreencitrus/godot-build-cli-go)
 - [Godot Build CLI](#godot-build-cli)
